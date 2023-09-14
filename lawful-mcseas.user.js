@@ -1,32 +1,295 @@
 // ==UserScript==
-// @name         lawful-mcseas
-// @name:en      Lawful MC seas
-// @name:zh-CN   秩序心海
-// @namespace    https://mcseas.club/home.php?mod=space&uid=95082
-// @version      0.3.2-alpha
-// @author       Miyoi
-// @description  改善「混沌心海」论坛的使用体验。
-// @license      MIT
-// @icon         https://mcseas.club/favicon.ico
-// @homepage     https://mcseas.club/forum.php?mod=viewthread&tid=50579
-// @match        *://mcseas.club/*
-// @require      https://unpkg.com/heti/umd/heti-addon.min.js
-// @resource     css  https://unpkg.com/heti/umd/heti.min.css
-// @grant        GM_addStyle
-// @grant        GM_deleteValue
-// @grant        GM_getResourceText
-// @grant        GM_getValue
-// @grant        GM_listValues
-// @grant        GM_log
-// @grant        GM_openInTab
-// @grant        GM_registerMenuCommand
-// @grant        GM_setValue
-// @grant        GM_unregisterMenuCommand
+// @name               lawful-mcseas
+// @name:en            Lawful MC seas
+// @name:zh-CN         秩序心海
+// @namespace          https://mcseas.club/home.php?mod=space&uid=95082
+// @version            0.3.3-alpha
+// @author             Miyoi
+// @description:en     Improve the user experience of mcseas.
+// @description:zh-CN  改善「混沌心海」论坛的使用体验。
+// @license            MIT
+// @icon               https://mcseas.club/favicon.ico
+// @homepage           https://mcseas.club/forum.php?mod=viewthread&tid=50579
+// @match              *://mcseas.club/*
+// @require            https://unpkg.com/heti/umd/heti-addon.min.js
+// @resource           css  https://unpkg.com/heti/umd/heti.min.css
+// @grant              GM_addStyle
+// @grant              GM_deleteValue
+// @grant              GM_getResourceText
+// @grant              GM_getValue
+// @grant              GM_listValues
+// @grant              GM_log
+// @grant              GM_openInTab
+// @grant              GM_registerMenuCommand
+// @grant              GM_setValue
+// @grant              GM_unregisterMenuCommand
 // ==/UserScript==
 
 (function () {
-	'use strict';
+  'use strict';
 
-	var k=Object.defineProperty;var S=(e,t,n)=>t in e?k(e,t,{enumerable:!0,configurable:!0,writable:!0,value:n}):e[t]=n;var a=(e,t,n)=>(S(e,typeof t!="symbol"?t+"":t,n),n);var c=(()=>typeof GM_addStyle<"u"?GM_addStyle:void 0)(),z=(()=>typeof GM_deleteValue<"u"?GM_deleteValue:void 0)(),x=(()=>typeof GM_getResourceText<"u"?GM_getResourceText:void 0)(),l=(()=>typeof GM_getValue<"u"?GM_getValue:void 0)(),w=(()=>typeof GM_listValues<"u"?GM_listValues:void 0)(),I=(()=>typeof GM_log<"u"?GM_log:void 0)(),V=(()=>typeof GM_openInTab<"u"?GM_openInTab:void 0)(),_=(()=>typeof GM_registerMenuCommand<"u"?GM_registerMenuCommand:void 0)(),M=(()=>typeof GM_setValue<"u"?GM_setValue:void 0)(),$=(()=>typeof GM_unregisterMenuCommand<"u"?GM_unregisterMenuCommand:void 0)(),C=(()=>window)();const T="lawful-mcseas",q="0.3.2",j="module",D={dev:"vite",build:"tsc && vite build",preview:"vite preview"},E={typescript:"^5.1.6","unplugin-auto-import":"^0.16.6",vite:"^4.4.8","vite-plugin-monkey":"^3.4.0"},H={name:T,private:!0,version:q,type:j,scripts:D,devDependencies:E};class U{current(){const t=new Date,n=(s,y=2,G="0")=>s.toString().padStart(y,G);return [n(t.getFullYear(),4),n(t.getMonth()),n(t.getDate())].join("-")+" "+[n(t.getHours()),n(t.getMinutes()),n(t.getSeconds())].join(":")}debug(...t){I(`${this.current()} | DEBUG |`,...t);}log(...t){console.log(`${this.current()} [秩序心海]`,...t);}}class A{constructor(){a(this,"version",`${H.version}-alpha`);a(this,"auto_format");a(this,"font_name");a(this,"font_size");a(this,"only_format_lz");a(this,"block_ip_warning");a(this,"block_email_warning");this.load();}load(){this.auto_format=l("cfg_auto_format")!=="false",this.font_name=l("cfg_font_name")||"小赖字体 等宽 SC",this.font_size=Number(l("cfg_font_size")),this.font_size=this.font_size>0?this.font_size:16,this.only_format_lz=l("cfg_only_format_lz")!=="false",this.block_ip_warning=l("cfg_block_ip_warning")==="true",this.block_email_warning=l("cfg_block_email_warning")==="true";}save(t,n){M(`cfg_${t}`,n),this.load();}}const i=new U,o=new A;i.debug("lawful-mcseas 脚本开发中...");i.debug("GM_listValues()",w());i.log("脚本当前版本:",o.version);i.log("自动格式化正文:",o.auto_format);i.log(`自动格式化时 正文字体: "${o.font_name}"`);i.log(`自动格式化时 正文字体大小: ${o.font_size} px`);i.log("只格式化一楼:",o.only_format_lz);i.log("自动屏蔽异地 IP 登录提醒:",o.block_ip_warning);let u=setInterval(()=>{setTimeout(L,0);},50),f=0;function L(){f+=1,f>50&&clearInterval(u);let e=document.querySelector("button#fwin_dialog_submit");e&&(e.click(),clearInterval(u));}let r={click_num:void 0,auto_format:void 0,format_font_name:void 0,format_font_size:void 0,switch_ip_warning:void 0,go_to_report:void 0,reset_config:void 0};const d=()=>{Object.values(r).forEach(e=>{e&&$(e);}),r.click_num=_("👆 点击了 "+l("click_num",0)+" 次",()=>{M("click_num",l("click_num",0)+1),d();}),r.auto_format=_((o.auto_format?"✔️ 已启用":"❌ 已禁用")+"自动格式化正文",()=>{o.save("auto_format",o.auto_format?"false":"true"),i.log((o.auto_format?"✔️ 已启用":"❌ 已禁用")+"自动格式化正文"),window.location.reload();}),o.auto_format&&(r.format_font_name=_(`　├─ 🗚 字体: "${o.font_name}"`,()=>{const e=prompt("请输入自定义字体名称 (需要电脑里已经安装好的字体):",o.font_name);e?(o.save("font_name",e),i.log(`字体设置为: "${e}"`),window.location.reload()):i.debug("用户取消输入");}),r.format_font_size=_(`　└─ 🗚 字体大小: ${o.font_size} px`,()=>{const e=Number(prompt("请输入自定义字体大小, 单位为像素(px):",String(o.font_size)));e>0?(o.save("font_size",String(e)),i.log(`字体大小设置为: ${e} px`),window.location.reload()):i.debug("用户取消输入");})),r.switch_ip_warning=_((o.block_ip_warning?"❌ 已禁用":"✔️ 已启用")+"异地 IP 登录提醒",()=>{o.save("block_ip_warning",o.block_ip_warning?"false":"true"),i.log((o.block_ip_warning?"❌ 已禁用":"✔️ 已启用")+"异地 IP 登录提醒"),d();}),r.go_to_report=_("🆕 提出需求 & 反馈 BUG",()=>{V("https://mcseas.club/forum.php?mod=viewthread&tid=50579",!1);}),r.reset_config=_("🆑 重置所有配置项",()=>{w().forEach(e=>{z(e);}),window.location.reload();});};d();if(o.block_ip_warning){let e=function(){n+=1,n>50&&clearInterval(t);let s=document.querySelectorAll("#ip_notice .bm_h a");s.length===1&&(s[0].click(),clearInterval(t));},t=setInterval(()=>{setTimeout(e,0);},50),n=0;}const m=window.location.href.match(/[&#]pid=?(\d+)/i);var p;if(m!==null){const e=m[1];let t=document.querySelector(`#pid${e}`);t&&((p=t.querySelector("td.plc"))==null||p.classList.add("highlight-card"),c(".highlight-card { background-color: #dedbcc; color: #363636; -moz-box-shadow: 0.075rem 0.125rem 0.25rem rgba(0, 0, 0, 0.5); -webkit-box-shadow: 0.075rem 0.125rem 0.25rem rgba(0, 0, 0, 0.5); box-shadow: 0.075rem 0.125rem 0.25rem rgba(0, 0, 0, 0.5); } .highlight-card:hover { -webkit-box-shadow: 0 0.325rem 1.75rem rgba(0, 0, 0, 0.3); -moz-box-shadow: 0 0.325rem 1.75rem rgba(0, 0, 0, 0.3); box-shadow: 0 0.325rem 1.75rem rgba(0, 0, 0, 0.3); }"));}var v;(v=document.querySelector("#append_parent"))==null||v.classList.add("heti-parent");let g=document.querySelectorAll("div#pt > div.z > a");var b,h;if(g.length>4&&["原创文学","审核区"].includes(g[3].innerText)){let e=document.querySelectorAll("table.plhin td.plc");for(let t=0;t<e.length&&!(o.only_format_lz&&((b=e[t].querySelector("div.pi > strong > a"))==null?void 0:b.innerText.trim())!=="战列舰");t++)(h=e[t].querySelector(".t_f"))==null||h.classList.add("heti");}if(o.auto_format){const e=[c(x("css")),c(`.heti, .heti-parent .pcb { font-family: "${o.font_name}", "Helvetica Neue", helvetica, arial, "Heti Hei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; font-size: ${o.font_size}px; }`)];i.debug("执行自动格式化 新增 CSS",e),window.onload=()=>{new C.Heti(".heti, .heti-parent .pcb").autoSpacing();};}
+  var __defProp = Object.defineProperty;
+  var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+  var __publicField = (obj, key, value) => {
+    __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+    return value;
+  };
+  var _a, _b, _c, _d;
+  var _GM_addStyle = /* @__PURE__ */ (() => typeof GM_addStyle != "undefined" ? GM_addStyle : void 0)();
+  var _GM_deleteValue = /* @__PURE__ */ (() => typeof GM_deleteValue != "undefined" ? GM_deleteValue : void 0)();
+  var _GM_getResourceText = /* @__PURE__ */ (() => typeof GM_getResourceText != "undefined" ? GM_getResourceText : void 0)();
+  var _GM_getValue = /* @__PURE__ */ (() => typeof GM_getValue != "undefined" ? GM_getValue : void 0)();
+  var _GM_listValues = /* @__PURE__ */ (() => typeof GM_listValues != "undefined" ? GM_listValues : void 0)();
+  var _GM_log = /* @__PURE__ */ (() => typeof GM_log != "undefined" ? GM_log : void 0)();
+  var _GM_openInTab = /* @__PURE__ */ (() => typeof GM_openInTab != "undefined" ? GM_openInTab : void 0)();
+  var _GM_registerMenuCommand = /* @__PURE__ */ (() => typeof GM_registerMenuCommand != "undefined" ? GM_registerMenuCommand : void 0)();
+  var _GM_setValue = /* @__PURE__ */ (() => typeof GM_setValue != "undefined" ? GM_setValue : void 0)();
+  var _GM_unregisterMenuCommand = /* @__PURE__ */ (() => typeof GM_unregisterMenuCommand != "undefined" ? GM_unregisterMenuCommand : void 0)();
+  var _monkeyWindow = /* @__PURE__ */ (() => window)();
+  const name = "lawful-mcseas";
+  const version = "0.3.3";
+  const type = "module";
+  const scripts = {
+    dev: "vite",
+    build: "tsc && vite build",
+    preview: "vite preview"
+  };
+  const devDependencies = {
+    typescript: "^5.1.6",
+    "unplugin-auto-import": "^0.16.6",
+    vite: "^4.4.8",
+    "vite-plugin-monkey": "^3.4.0"
+  };
+  const pkg = {
+    name,
+    "private": true,
+    version,
+    type,
+    scripts,
+    devDependencies
+  };
+  class Utils {
+    current() {
+      const t = /* @__PURE__ */ new Date();
+      const pad = (pad_target, pad_length = 2, pad_string = "0") => {
+        return pad_target.toString().padStart(pad_length, pad_string);
+      };
+      return [pad(t.getFullYear(), 4), pad(t.getMonth()), pad(t.getDate())].join("-") + " " + [pad(t.getHours()), pad(t.getMinutes()), pad(t.getSeconds())].join(":");
+    }
+    debug(...args) {
+      _GM_log(`${this.current()} | DEBUG |`, ...args);
+    }
+    log(...args) {
+      console.log(`${this.current()} [秩序心海]`, ...args);
+    }
+  }
+  class Config {
+    constructor() {
+      __publicField(this, "version", `${pkg.version}-alpha`);
+      __publicField(this, "auto_format");
+      __publicField(this, "font_name");
+      __publicField(this, "font_size");
+      __publicField(this, "only_format_lz");
+      __publicField(this, "block_ip_warning");
+      __publicField(this, "block_email_warning");
+      this.load();
+    }
+    load() {
+      this.auto_format = _GM_getValue("cfg_auto_format") !== "false";
+      this.font_name = _GM_getValue("cfg_font_name") || "小赖字体 等宽 SC";
+      this.font_size = Number(_GM_getValue("cfg_font_size"));
+      this.font_size = this.font_size > 0 ? this.font_size : 16;
+      this.only_format_lz = _GM_getValue("cfg_only_format_lz") !== "false";
+      this.block_ip_warning = _GM_getValue("cfg_block_ip_warning") === "true";
+      this.block_email_warning = _GM_getValue("cfg_block_email_warning") === "true";
+    }
+    save(key, value) {
+      _GM_setValue(`cfg_${key}`, value);
+      this.load();
+    }
+  }
+  const utils = new Utils();
+  const setting = new Config();
+  utils.debug("lawful-mcseas 脚本开发中...");
+  utils.debug("GM_listValues()", _GM_listValues());
+  utils.log("脚本当前版本:", setting.version);
+  utils.log("自动格式化正文:", setting.auto_format);
+  utils.log(`自动格式化时 正文字体: "${setting.font_name}"`);
+  utils.log(`自动格式化时 正文字体大小: ${setting.font_size} px`);
+  utils.log("只格式化一楼:", setting.only_format_lz);
+  utils.log("自动屏蔽异地 IP 登录提醒:", setting.block_ip_warning);
+  let block_email_timer = setInterval(() => {
+    setTimeout(block_email_warning, 0);
+  }, 50);
+  let counter = 0;
+  function block_email_warning() {
+    counter += 1;
+    if (counter > 50)
+      clearInterval(block_email_timer);
+    let skip_button_node = document.querySelector(
+      "button#fwin_dialog_submit"
+    );
+    if (skip_button_node) {
+      skip_button_node.click();
+      clearInterval(block_email_timer);
+    }
+  }
+  let menu_id_map = {
+    click_num: void 0,
+    auto_format: void 0,
+    format_font_name: void 0,
+    format_font_size: void 0,
+    switch_ip_warning: void 0,
+    go_to_report: void 0,
+    reset_config: void 0
+  };
+  const recreate_menu_command = () => {
+    Object.values(menu_id_map).forEach((menu_id) => {
+      if (menu_id)
+        _GM_unregisterMenuCommand(menu_id);
+    });
+    menu_id_map.click_num = _GM_registerMenuCommand(
+      "👆 点击了 " + _GM_getValue("click_num", 0) + " 次",
+      () => {
+        _GM_setValue("click_num", _GM_getValue("click_num", 0) + 1);
+        recreate_menu_command();
+      }
+    );
+    menu_id_map.auto_format = _GM_registerMenuCommand(
+      (setting.auto_format ? "✔️ 已启用" : "❌ 已禁用") + "自动格式化正文",
+      () => {
+        setting.save(
+          "auto_format",
+          setting.auto_format ? "false" : "true"
+          // 切换开关时取反
+        );
+        utils.log(
+          (setting.auto_format ? "✔️ 已启用" : "❌ 已禁用") + "自动格式化正文"
+        );
+        window.location.reload();
+      }
+    );
+    if (setting.auto_format) {
+      menu_id_map.format_font_name = _GM_registerMenuCommand(
+        `　├─ 🗚 字体: "${setting.font_name}"`,
+        () => {
+          const font_name = prompt(
+            "请输入自定义字体名称 (需要电脑里已经安装好的字体):",
+            setting.font_name
+          );
+          if (font_name) {
+            setting.save("font_name", font_name);
+            utils.log(`字体设置为: "${font_name}"`);
+            window.location.reload();
+          } else {
+            utils.debug("用户取消输入");
+          }
+        }
+      );
+      menu_id_map.format_font_size = _GM_registerMenuCommand(
+        `　└─ 🗚 字体大小: ${setting.font_size} px`,
+        () => {
+          const font_size = Number(
+            prompt(
+              "请输入自定义字体大小, 单位为像素(px):",
+              String(setting.font_size)
+            )
+          );
+          if (font_size > 0) {
+            setting.save("font_size", String(font_size));
+            utils.log(`字体大小设置为: ${font_size} px`);
+            window.location.reload();
+          } else {
+            utils.debug("用户取消输入");
+          }
+        }
+      );
+    }
+    menu_id_map.switch_ip_warning = _GM_registerMenuCommand(
+      (setting.block_ip_warning ? "❌ 已禁用" : "✔️ 已启用") + "异地 IP 登录提醒",
+      () => {
+        setting.save(
+          "block_ip_warning",
+          setting.block_ip_warning ? "false" : "true"
+          // 切换开关时取反
+        );
+        utils.log(
+          (setting.block_ip_warning ? "❌ 已禁用" : "✔️ 已启用") + "异地 IP 登录提醒"
+        );
+        recreate_menu_command();
+      }
+    );
+    menu_id_map.go_to_report = _GM_registerMenuCommand(
+      "🆕 提出需求 & 反馈 BUG",
+      () => {
+        _GM_openInTab(
+          "https://mcseas.club/forum.php?mod=viewthread&tid=50579",
+          false
+          // 跳转到打开的标签页
+        );
+      }
+    );
+    menu_id_map.reset_config = _GM_registerMenuCommand("🆑 重置所有配置项", () => {
+      _GM_listValues().forEach((key) => {
+        _GM_deleteValue(key);
+      });
+      window.location.reload();
+    });
+  };
+  recreate_menu_command();
+  if (setting.block_ip_warning) {
+    let block_ip_warning = function() {
+      counter2 += 1;
+      if (counter2 > 50)
+        clearInterval(block_ip_timer);
+      let close_button_nodes = document.querySelectorAll("#ip_notice .bm_h a");
+      if (close_button_nodes.length === 1) {
+        close_button_nodes[0].click();
+        clearInterval(block_ip_timer);
+      }
+    };
+    let block_ip_timer = setInterval(() => {
+      setTimeout(block_ip_warning, 0);
+    }, 50);
+    let counter2 = 0;
+  }
+  const target_pid_str = window.location.href.match(/[&#]pid=?(\d+)/i);
+  if (target_pid_str !== null) {
+    const target_pid = target_pid_str[1];
+    let target_pid_node = document.querySelector(
+      `#pid${target_pid}`
+    );
+    if (target_pid_node) {
+      (_a = target_pid_node.querySelector("td.plc")) == null ? void 0 : _a.classList.add("highlight-card");
+      _GM_addStyle(
+        `.highlight-card { background-color: #dedbcc; color: #363636; -moz-box-shadow: 0.075rem 0.125rem 0.25rem rgba(0, 0, 0, 0.5); -webkit-box-shadow: 0.075rem 0.125rem 0.25rem rgba(0, 0, 0, 0.5); box-shadow: 0.075rem 0.125rem 0.25rem rgba(0, 0, 0, 0.5); } .highlight-card:hover { -webkit-box-shadow: 0 0.325rem 1.75rem rgba(0, 0, 0, 0.3); -moz-box-shadow: 0 0.325rem 1.75rem rgba(0, 0, 0, 0.3); box-shadow: 0 0.325rem 1.75rem rgba(0, 0, 0, 0.3); }`
+      );
+    }
+  }
+  (_b = document.querySelector("#append_parent")) == null ? void 0 : _b.classList.add("heti-parent");
+  let breadcrumb_nodes = document.querySelectorAll("div#pt > div.z > a");
+  if (breadcrumb_nodes.length > 4 && ["原创文学", "审核区"].includes(breadcrumb_nodes[3].innerText)) {
+    let post_nodes = document.querySelectorAll("table.plhin td.plc");
+    for (let i = 0; i < post_nodes.length; i++) {
+      if (setting.only_format_lz && ((_c = post_nodes[i].querySelector("div.pi > strong > a")) == null ? void 0 : _c.innerText.trim()) !== "战列舰")
+        break;
+      (_d = post_nodes[i].querySelector(".t_f")) == null ? void 0 : _d.classList.add("heti");
+    }
+  }
+  if (setting.auto_format) {
+    const style_nodes = [
+      _GM_addStyle(_GM_getResourceText("css")),
+      // 引入赫蹏 CSS
+      _GM_addStyle(
+        `.heti, .heti-parent .pcb { font-family: "${setting.font_name}", "Helvetica Neue", helvetica, arial, "Heti Hei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; font-size: ${setting.font_size}px; }`
+      )
+      // 修改字体
+    ];
+    utils.debug("执行自动格式化 新增 CSS", style_nodes);
+    window.onload = () => {
+      const heti = new _monkeyWindow.Heti(".heti, .heti-parent .pcb");
+      heti.autoSpacing();
+    };
+  }
 
 })();
