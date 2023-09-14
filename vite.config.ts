@@ -14,8 +14,11 @@ export default defineConfig({
       userscript: {
         name: { en: "Lawful MC seas", "zh-CN": "秩序心海" },
         namespace: "https://mcseas.club/home.php?mod=space&uid=95082",
-        version: "0.3.2-alpha",
-        description: "改善「混沌心海」论坛的使用体验。",
+        version: "0.3.3-alpha",
+        description: {
+          en: "Improve the user experience of mcseas.",
+          "zh-CN": "改善「混沌心海」论坛的使用体验。",
+        },
         author: "Miyoi",
         homepage: "https://mcseas.club/forum.php?mod=viewthread&tid=50579",
         license: "MIT",
@@ -36,6 +39,6 @@ export default defineConfig({
     }),
   ],
   build: {
-    minify: true,
+    // minify: true,
   },
 });
