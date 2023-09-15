@@ -3,7 +3,7 @@
 // @name:en            Lawful MC seas
 // @name:zh-CN         秩序心海
 // @namespace          https://mcseas.club/home.php?mod=space&uid=95082
-// @version            0.3.3-alpha
+// @version            0.3.4-alpha
 // @author             Miyoi
 // @description:en     Improve the user experience of mcseas.
 // @description:zh-CN  改善「混沌心海」论坛的使用体验。
@@ -23,6 +23,7 @@
 // @grant              GM_registerMenuCommand
 // @grant              GM_setValue
 // @grant              GM_unregisterMenuCommand
+// @run-at             document-end
 // ==/UserScript==
 
 (function () {
@@ -47,7 +48,7 @@
   var _GM_unregisterMenuCommand = /* @__PURE__ */ (() => typeof GM_unregisterMenuCommand != "undefined" ? GM_unregisterMenuCommand : void 0)();
   var _monkeyWindow = /* @__PURE__ */ (() => window)();
   const name = "lawful-mcseas";
-  const version = "0.3.3";
+  const version = "0.3.4";
   const type = "module";
   const scripts = {
     dev: "vite",
@@ -110,8 +111,6 @@
   }
   const utils = new Utils();
   const setting = new Config();
-  utils.debug("lawful-mcseas 脚本开发中...");
-  utils.debug("GM_listValues()", _GM_listValues());
   utils.log("脚本当前版本:", setting.version);
   utils.log("自动格式化正文:", setting.auto_format);
   utils.log(`自动格式化时 正文字体: "${setting.font_name}"`);
@@ -134,6 +133,10 @@
       clearInterval(block_email_timer);
     }
   }
+  const style_node = _GM_addStyle(
+    `.tl th a:visited, .tl td.fn a:visited { color: #ccc; }`
+  );
+  utils.debug(`添加自定义样式 新增 CSS id: style#${style_node.id}`);
   let menu_id_map = {
     click_num: void 0,
     auto_format: void 0,
@@ -261,9 +264,10 @@
     );
     if (target_pid_node) {
       (_a = target_pid_node.querySelector("td.plc")) == null ? void 0 : _a.classList.add("highlight-card");
-      _GM_addStyle(
+      const style_node2 = _GM_addStyle(
         `.highlight-card { background-color: #dedbcc; color: #363636; -moz-box-shadow: 0.075rem 0.125rem 0.25rem rgba(0, 0, 0, 0.5); -webkit-box-shadow: 0.075rem 0.125rem 0.25rem rgba(0, 0, 0, 0.5); box-shadow: 0.075rem 0.125rem 0.25rem rgba(0, 0, 0, 0.5); } .highlight-card:hover { -webkit-box-shadow: 0 0.325rem 1.75rem rgba(0, 0, 0, 0.3); -moz-box-shadow: 0 0.325rem 1.75rem rgba(0, 0, 0, 0.3); box-shadow: 0 0.325rem 1.75rem rgba(0, 0, 0, 0.3); }`
       );
+      utils.debug(`高亮当前楼层 新增 CSS id: style#${style_node2.id}`);
     }
   }
   (_b = document.querySelector("#append_parent")) == null ? void 0 : _b.classList.add("heti-parent");
@@ -285,7 +289,10 @@
       )
       // 修改字体
     ];
-    utils.debug("执行自动格式化 新增 CSS", style_nodes);
+    utils.debug(
+      "自动格式化正文 新增 CSS id:",
+      style_nodes.map((node) => `style#${node.id}`)
+    );
     window.onload = () => {
       const heti = new _monkeyWindow.Heti(".heti, .heti-parent .pcb");
       heti.autoSpacing();
