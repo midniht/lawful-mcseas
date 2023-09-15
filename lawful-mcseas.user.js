@@ -3,7 +3,7 @@
 // @name:en            Lawful MC seas
 // @name:zh-CN         秩序心海
 // @namespace          https://mcseas.club/home.php?mod=space&uid=95082
-// @version            0.3.5-alpha
+// @version            0.3.6-alpha
 // @author             miyoi
 // @description:en     Improve the user experience of mcseas.
 // @description:zh-CN  改善「混沌心海」论坛的使用体验。
@@ -49,7 +49,7 @@
   var _GM_unregisterMenuCommand = /* @__PURE__ */ (() => typeof GM_unregisterMenuCommand != "undefined" ? GM_unregisterMenuCommand : void 0)();
   var _monkeyWindow = /* @__PURE__ */ (() => window)();
   const name = "lawful-mcseas";
-  const version = "0.3.5";
+  const version = "0.3.6";
   const type = "module";
   const scripts = {
     dev: "vite",
@@ -171,7 +171,8 @@
         );
         rerender_auto_format();
         recreate_menu_command();
-      }
+      },
+      "r"
     );
     if (setting.auto_format) {
       menu_id_map.format_font_name = _GM_registerMenuCommand(
@@ -189,7 +190,8 @@
           } else {
             utils.debug("用户取消输入");
           }
-        }
+        },
+        "f"
       );
       menu_id_map.format_font_size = _GM_registerMenuCommand(
         `　└─ 🗚 字体大小: ${setting.font_size} px`,
@@ -208,7 +210,8 @@
           } else {
             utils.debug("用户取消输入");
           }
-        }
+        },
+        "s"
       );
     }
     menu_id_map.switch_ip_warning = _GM_registerMenuCommand(
@@ -275,7 +278,7 @@
   }
   (_c = document.querySelector("#append_parent")) == null ? void 0 : _c.classList.add("heti-parent");
   let breadcrumb_nodes = document.querySelectorAll("div#pt > div.z > a");
-  if (breadcrumb_nodes.length > 4 && ["原创文学", "审核区"].includes(breadcrumb_nodes[3].innerText)) {
+  if (breadcrumb_nodes.length > 4 && ["原创文学", "审核区", "小说"].includes(breadcrumb_nodes[3].innerText)) {
     let post_nodes = document.querySelectorAll("table.plhin td.plc");
     for (let i = 0; i < post_nodes.length; i++) {
       if (setting.only_format_lz && ((_d = post_nodes[i].querySelector("div.pi > strong > a")) == null ? void 0 : _d.innerText.trim()) !== "战列舰")
