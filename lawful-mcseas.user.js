@@ -4,7 +4,7 @@
 // @name:zh-CN         秩序心海
 // @namespace          https://mcseas.club/home.php?mod=space&uid=95082
 // @version            0.3.4-alpha
-// @author             Miyoi
+// @author             miyoi
 // @description:en     Improve the user experience of mcseas.
 // @description:zh-CN  改善「混沌心海」论坛的使用体验。
 // @license            MIT
