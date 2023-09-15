@@ -3,13 +3,14 @@
 // @name:en            Lawful MC seas
 // @name:zh-CN         秩序心海
 // @namespace          https://mcseas.club/home.php?mod=space&uid=95082
-// @version            0.3.4-alpha
+// @version            0.3.5-alpha
 // @author             miyoi
 // @description:en     Improve the user experience of mcseas.
 // @description:zh-CN  改善「混沌心海」论坛的使用体验。
 // @license            MIT
 // @icon               https://mcseas.club/favicon.ico
 // @homepage           https://mcseas.club/forum.php?mod=viewthread&tid=50579
+// @homepageURL        https://github.com/midniht/lawful-mcseas
 // @match              *://mcseas.club/*
 // @require            https://unpkg.com/heti/umd/heti-addon.min.js
 // @resource           css  https://unpkg.com/heti/umd/heti.min.css
@@ -35,7 +36,7 @@
     __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
     return value;
   };
-  var _a, _b, _c, _d;
+  var _a, _b, _c, _d, _e;
   var _GM_addStyle = /* @__PURE__ */ (() => typeof GM_addStyle != "undefined" ? GM_addStyle : void 0)();
   var _GM_deleteValue = /* @__PURE__ */ (() => typeof GM_deleteValue != "undefined" ? GM_deleteValue : void 0)();
   var _GM_getResourceText = /* @__PURE__ */ (() => typeof GM_getResourceText != "undefined" ? GM_getResourceText : void 0)();
@@ -48,7 +49,7 @@
   var _GM_unregisterMenuCommand = /* @__PURE__ */ (() => typeof GM_unregisterMenuCommand != "undefined" ? GM_unregisterMenuCommand : void 0)();
   var _monkeyWindow = /* @__PURE__ */ (() => window)();
   const name = "lawful-mcseas";
-  const version = "0.3.4";
+  const version = "0.3.5";
   const type = "module";
   const scripts = {
     dev: "vite",
@@ -133,10 +134,13 @@
       clearInterval(block_email_timer);
     }
   }
-  const style_node = _GM_addStyle(
-    `.tl th a:visited, .tl td.fn a:visited { color: #ccc; }`
-  );
-  utils.debug(`添加自定义样式 新增 CSS id: style#${style_node.id}`);
+  let style_nodes = {
+    custom: _GM_addStyle(`.tl th a:visited, .tl td.fn a:visited { color: #ccc; }`),
+    custom_format_font: void 0,
+    custom_highlight_floor: void 0,
+    heti: void 0
+  };
+  utils.debug(`添加自定义样式 新增 CSS id: style#${(_a = style_nodes.custom) == null ? void 0 : _a.id}`);
   let menu_id_map = {
     click_num: void 0,
     auto_format: void 0,
@@ -165,7 +169,8 @@
         utils.log(
           (setting.auto_format ? "✔️ 已启用" : "❌ 已禁用") + "自动格式化正文"
         );
-        window.location.reload();
+        rerender_auto_format();
+        recreate_menu_command();
       }
     );
     if (setting.auto_format) {
@@ -179,7 +184,8 @@
           if (font_name) {
             setting.save("font_name", font_name);
             utils.log(`字体设置为: "${font_name}"`);
-            window.location.reload();
+            rerender_auto_format(false);
+            recreate_menu_command();
           } else {
             utils.debug("用户取消输入");
           }
@@ -197,7 +203,8 @@
           if (font_size > 0) {
             setting.save("font_size", String(font_size));
             utils.log(`字体大小设置为: ${font_size} px`);
-            window.location.reload();
+            rerender_auto_format(false);
+            recreate_menu_command();
           } else {
             utils.debug("用户取消输入");
           }
@@ -257,40 +264,51 @@
       `#pid${target_pid}`
     );
     if (target_pid_node) {
-      (_a = target_pid_node.querySelector("td.plc")) == null ? void 0 : _a.classList.add("highlight-card");
-      const style_node2 = _GM_addStyle(
+      (_b = target_pid_node.querySelector("td.plc")) == null ? void 0 : _b.classList.add("highlight-card");
+      style_nodes.custom_highlight_floor = _GM_addStyle(
         `.highlight-card { background-color: #dedbcc; color: #363636; -moz-box-shadow: 0.075rem 0.125rem 0.25rem rgba(0, 0, 0, 0.5); -webkit-box-shadow: 0.075rem 0.125rem 0.25rem rgba(0, 0, 0, 0.5); box-shadow: 0.075rem 0.125rem 0.25rem rgba(0, 0, 0, 0.5); } .highlight-card:hover { -webkit-box-shadow: 0 0.325rem 1.75rem rgba(0, 0, 0, 0.3); -moz-box-shadow: 0 0.325rem 1.75rem rgba(0, 0, 0, 0.3); box-shadow: 0 0.325rem 1.75rem rgba(0, 0, 0, 0.3); }`
       );
-      utils.debug(`高亮当前楼层 新增 CSS id: style#${style_node2.id}`);
+      utils.debug(
+        `高亮当前楼层 新增 CSS id: style#${style_nodes.custom_highlight_floor.id}`
+      );
     }
   }
-  (_b = document.querySelector("#append_parent")) == null ? void 0 : _b.classList.add("heti-parent");
+  (_c = document.querySelector("#append_parent")) == null ? void 0 : _c.classList.add("heti-parent");
   let breadcrumb_nodes = document.querySelectorAll("div#pt > div.z > a");
   if (breadcrumb_nodes.length > 4 && ["原创文学", "审核区"].includes(breadcrumb_nodes[3].innerText)) {
     let post_nodes = document.querySelectorAll("table.plhin td.plc");
     for (let i = 0; i < post_nodes.length; i++) {
-      if (setting.only_format_lz && ((_c = post_nodes[i].querySelector("div.pi > strong > a")) == null ? void 0 : _c.innerText.trim()) !== "战列舰")
+      if (setting.only_format_lz && ((_d = post_nodes[i].querySelector("div.pi > strong > a")) == null ? void 0 : _d.innerText.trim()) !== "战列舰")
         break;
-      (_d = post_nodes[i].querySelector(".t_f")) == null ? void 0 : _d.classList.add("heti");
+      (_e = post_nodes[i].querySelector(".t_f")) == null ? void 0 : _e.classList.add("heti");
     }
   }
-  if (setting.auto_format) {
-    const style_nodes = [
-      // 引入赫蹏 CSS
-      _GM_addStyle(_GM_getResourceText("css")),
-      // 修改字体
-      _GM_addStyle(
+  const rerender_auto_format = (include_heti = true) => {
+    var _a2, _b2, _c2, _d2;
+    if (setting.auto_format) {
+      if (include_heti) {
+        (_a2 = style_nodes.heti) == null ? void 0 : _a2.remove();
+        style_nodes.heti = _GM_addStyle(_GM_getResourceText("css"));
+        utils.debug(
+          `自动格式化正文 赫蹏 更新 CSS id: style#${style_nodes.heti.id}`
+        );
+        window.onload = () => {
+          const heti = new _monkeyWindow.Heti(".heti, .heti-parent .pcb");
+          heti.autoSpacing();
+        };
+      }
+      (_b2 = style_nodes.custom_format_font) == null ? void 0 : _b2.remove();
+      style_nodes.custom_format_font = _GM_addStyle(
         `.heti, .heti-parent .pcb { font-family: "${setting.font_name}", "Helvetica Neue", helvetica, arial, "Heti Hei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; font-size: ${setting.font_size}px; }`
-      )
-    ];
-    utils.debug(
-      "自动格式化正文 新增 CSS id:",
-      style_nodes.map((node) => `style#${node.id}`)
-    );
-    window.onload = () => {
-      const heti = new _monkeyWindow.Heti(".heti, .heti-parent .pcb");
-      heti.autoSpacing();
-    };
-  }
+      );
+      utils.debug(
+        `自动格式化正文 自定义字体 更新 CSS id: style#${style_nodes.custom_format_font.id}`
+      );
+    } else {
+      (_c2 = style_nodes.heti) == null ? void 0 : _c2.remove();
+      (_d2 = style_nodes.custom_format_font) == null ? void 0 : _d2.remove();
+    }
+  };
+  rerender_auto_format();
 
 })();
