@@ -172,7 +172,8 @@ const recreate_menu_command = () => {
       );
       rerender_auto_format();
       recreate_menu_command();
-    }
+    },
+    "r"
   );
   if (setting.auto_format) {
     menu_id_map.format_font_name = GM_registerMenuCommand(
@@ -190,7 +191,8 @@ const recreate_menu_command = () => {
         } else {
           utils.debug("用户取消输入");
         }
-      }
+      },
+      "f"
     );
     menu_id_map.format_font_size = GM_registerMenuCommand(
       `　└─ 🗚 字体大小: ${setting.font_size} px`,
@@ -209,7 +211,8 @@ const recreate_menu_command = () => {
         } else {
           utils.debug("用户取消输入");
         }
-      }
+      },
+      "s"
     );
   }
   menu_id_map.switch_ip_warning = GM_registerMenuCommand(
@@ -300,7 +303,7 @@ let breadcrumb_nodes: NodeListOf<HTMLElement> =
 // 只对原创区帖子生效
 if (
   breadcrumb_nodes.length > 4 &&
-  ["原创文学", "审核区"].includes(breadcrumb_nodes[3].innerText)
+  ["原创文学", "审核区", "小说"].includes(breadcrumb_nodes[3].innerText)
 ) {
   let post_nodes: NodeListOf<Element> =
     document.querySelectorAll("table.plhin td.plc");
