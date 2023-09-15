@@ -78,8 +78,8 @@ class Config {
 const utils = new Utils();
 const setting = new Config();
 
-utils.debug("lawful-mcseas 脚本开发中...");
-utils.debug("GM_listValues()", GM_listValues());
+// utils.debug("lawful-mcseas 脚本开发中...");
+// utils.debug("GM_listValues()", GM_listValues());
 // console.log({ unsafeWindow, monkeyWindow });
 
 utils.log("脚本当前版本:", setting.version);
@@ -117,6 +117,12 @@ function block_email_warning() {
     clearInterval(block_email_timer);
   }
 }
+
+// 添加自定义样式 CSS
+const style_node: HTMLStyleElement = GM_addStyle(
+  `.tl th a:visited, .tl td.fn a:visited { color: #ccc; }`
+);
+utils.debug(`添加自定义样式 新增 CSS id: style#${style_node.id}`);
 
 // 注册脚本菜单
 type MenuIdMap = {
@@ -259,7 +265,7 @@ if (setting.block_ip_warning) {
   }
 }
 
-// 高亮跳转显示楼层
+// 高亮显示当前地址跳转楼层
 const target_pid_str = window.location.href.match(/[&#]pid=?(\d+)/i);
 if (target_pid_str !== null) {
   const target_pid = target_pid_str[1];
@@ -268,9 +274,10 @@ if (target_pid_str !== null) {
   );
   if (target_pid_node) {
     target_pid_node.querySelector("td.plc")?.classList.add("highlight-card");
-    GM_addStyle(
+    const style_node: HTMLStyleElement = GM_addStyle(
       `.highlight-card { background-color: #dedbcc; color: #363636; -moz-box-shadow: 0.075rem 0.125rem 0.25rem rgba(0, 0, 0, 0.5); -webkit-box-shadow: 0.075rem 0.125rem 0.25rem rgba(0, 0, 0, 0.5); box-shadow: 0.075rem 0.125rem 0.25rem rgba(0, 0, 0, 0.5); } .highlight-card:hover { -webkit-box-shadow: 0 0.325rem 1.75rem rgba(0, 0, 0, 0.3); -moz-box-shadow: 0 0.325rem 1.75rem rgba(0, 0, 0, 0.3); box-shadow: 0 0.325rem 1.75rem rgba(0, 0, 0, 0.3); }`
     );
+    utils.debug(`高亮当前楼层 新增 CSS id: style#${style_node.id}`);
   }
 }
 
@@ -297,13 +304,16 @@ if (
   }
 }
 if (setting.auto_format) {
-  const style_nodes = [
+  const style_nodes: HTMLStyleElement[] = [
     GM_addStyle(GM_getResourceText("css")), // 引入赫蹏 CSS
     GM_addStyle(
       `.heti, .heti-parent .pcb { font-family: "${setting.font_name}", "Helvetica Neue", helvetica, arial, "Heti Hei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; font-size: ${setting.font_size}px; }`
     ), // 修改字体
   ];
-  utils.debug("执行自动格式化 新增 CSS", style_nodes);
+  utils.debug(
+    "自动格式化正文 新增 CSS id:",
+    style_nodes.map((node) => `style#${node.id}`)
+  );
 
   window.onload = () => {
     // @ts-ignore: 使用挂载到 monkeyWindow 的 Heti

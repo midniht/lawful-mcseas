@@ -9,8 +9,8 @@
 
 1. 自动格式化正文（文区的帖子一楼）内容：
    - 包括自定义字体和大小（原理是调用本地字体，只要电脑上安装了写上字体名就能用）；
-   - 以及使用 [<ruby><rb>赫蹏</rb><rp>（</rp><rt>hè tí</rt><rp>）</rp></ruby>](https://github.com/sivan/heti) 自动进行排版优化，包括但不限于中英文混排美化以及更优雅的标点挤压等。兼容 Discuz!X3.4 论坛自带的阅读模式。\
-      （沉浸式阅读模式有 bug：赫蹏未生效。由于是**新增节点**到 `div#append_parent` 这个容器里，需要在更新 DOM 后使用赫蹏重排。）
+   - 以及使用 [<ruby><rb>赫蹏</rb><rp>（</rp><rt>hè tí</rt><rp>）</rp></ruby>](https://github.com/sivan/heti) 自动进行排版优化，包括但不限于中英文混排美化以及更优雅的标点挤压等。\
+      兼容 Discuz!X3.4 论坛自带的阅读模式。（沉浸式阅读模式有 bug：赫蹏 JS 未生效。由于是**新增节点**到 `div#append_parent` 这个容器里，需要在更新 DOM 后使用赫蹏重排。）
 2. 自动跳过首页的「邮箱未验证」提示。
 3. 可设置是否跳过「异地 IP 登录」安全提醒。
 4. 高亮显示（通过超链接）跳转到的楼层。
@@ -21,7 +21,7 @@
 - ~~沉浸式阅读模式下自动滚动 `document.documentElement.scrollTop`~~ 已放弃（长按鼠标中键：你在干嘛？）
 - ~~将配置项与源码解耦，以免用户每次更新脚本后都需要重新设置~~ 2023.9.14 done
 - 全文关键词替换（可以用来换主角名字，我觉得过于羞耻接受不能，但曾经听说 Pixiv 出过这功能，想必还是有市场的）
-- 已读帖子变灰（理论上改下 `:visited` 伪类 CSS 颜色的事，但潜意识感觉好像没有这么简单）
+- ~~已读帖子变灰（理论上改下 `:visited` 伪类 CSS 颜色的事，但下意识感觉好像没有这么简单）~~ done 想多了
 - 优化论坛自带的阅读模式（容器宽度、行间距等），做成真正的沉浸式
 - 自定义字体 / 大小实时生效（现在是修改后自动刷新页面）
 - 可选设置鼠标覆盖时 `:hover` 添加下划线（波浪线 `text-decoration-style: wavy;`）
@@ -31,7 +31,7 @@
      - 缺点：过于绿皮。
   2. 思路二（优雅）：使用 [`window.queryLocalFonts()`](https://developer.mozilla.org/en-US/docs/Web/API/Window/queryLocalFonts) 方法。
      - 优点：实现合理（精准而优雅）。
-     - 缺点：兼容性过差（[Chrome 103 以上](https://caniuse.com/mdn-api_window_querylocalfonts)才支持，目前只有 Chrome 和 Edge）。\
+     - 缺点：兼容性过差（[Chrome 103 以上](https://caniuse.com/mdn-api_window_querylocalfonts) 才支持，目前只有 Chrome 和 Edge）。\
        不安全（貌似会弹警告），这是因为字体安装情况由于——不同 OS 版本、个人选择、软件自带「嫁妆」——带来的差异而具有高度的独特性，可以当作某种指纹使用（识别用户身份）。
 
 ## 开发

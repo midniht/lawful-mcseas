@@ -14,7 +14,7 @@ export default defineConfig({
       userscript: {
         name: { en: "Lawful MC seas", "zh-CN": "秩序心海" },
         namespace: "https://mcseas.club/home.php?mod=space&uid=95082",
-        version: "0.3.3-alpha",
+        version: "0.3.4-alpha",
         description: {
           en: "Improve the user experience of mcseas.",
           "zh-CN": "改善「混沌心海」论坛的使用体验。",
@@ -26,6 +26,7 @@ export default defineConfig({
         icon: "https://mcseas.club/favicon.ico",
         require: ["https://unpkg.com/heti/umd/heti-addon.min.js"],
         resource: { css: "https://unpkg.com/heti/umd/heti.min.css" },
+        "run-at": "document-end",
       },
       // build: {
       //   externalGlobals: {
