@@ -119,10 +119,19 @@ function block_email_warning() {
 }
 
 // 添加自定义样式 CSS
-const style_node: HTMLStyleElement = GM_addStyle(
-  `.tl th a:visited, .tl td.fn a:visited { color: #ccc; }`
-);
-utils.debug(`添加自定义样式 新增 CSS id: style#${style_node.id}`);
+type StyleNodes = {
+  custom: HTMLStyleElement | undefined;
+  custom_format_font: HTMLStyleElement | undefined;
+  custom_highlight_floor: HTMLStyleElement | undefined;
+  heti: HTMLStyleElement | undefined;
+};
+let style_nodes: StyleNodes = {
+  custom: GM_addStyle(`.tl th a:visited, .tl td.fn a:visited { color: #ccc; }`),
+  custom_format_font: undefined,
+  custom_highlight_floor: undefined,
+  heti: undefined,
+};
+utils.debug(`添加自定义样式 新增 CSS id: style#${style_nodes.custom?.id}`);
 
 // 注册脚本菜单
 type MenuIdMap = {
@@ -161,7 +170,8 @@ const recreate_menu_command = () => {
       utils.log(
         (setting.auto_format ? "✔️ 已启用" : "❌ 已禁用") + "自动格式化正文"
       );
-      window.location.reload();
+      rerender_auto_format();
+      recreate_menu_command();
     }
   );
   if (setting.auto_format) {
@@ -175,7 +185,8 @@ const recreate_menu_command = () => {
         if (font_name) {
           setting.save("font_name", font_name);
           utils.log(`字体设置为: "${font_name}"`);
-          window.location.reload();
+          rerender_auto_format(false);
+          recreate_menu_command();
         } else {
           utils.debug("用户取消输入");
         }
@@ -193,7 +204,8 @@ const recreate_menu_command = () => {
         if (font_size > 0) {
           setting.save("font_size", String(font_size));
           utils.log(`字体大小设置为: ${font_size} px`);
-          window.location.reload();
+          rerender_auto_format(false);
+          recreate_menu_command();
         } else {
           utils.debug("用户取消输入");
         }
@@ -272,10 +284,12 @@ if (target_pid_str !== null) {
   );
   if (target_pid_node) {
     target_pid_node.querySelector("td.plc")?.classList.add("highlight-card");
-    const style_node: HTMLStyleElement = GM_addStyle(
+    style_nodes.custom_highlight_floor = GM_addStyle(
       `.highlight-card { background-color: #dedbcc; color: #363636; -moz-box-shadow: 0.075rem 0.125rem 0.25rem rgba(0, 0, 0, 0.5); -webkit-box-shadow: 0.075rem 0.125rem 0.25rem rgba(0, 0, 0, 0.5); box-shadow: 0.075rem 0.125rem 0.25rem rgba(0, 0, 0, 0.5); } .highlight-card:hover { -webkit-box-shadow: 0 0.325rem 1.75rem rgba(0, 0, 0, 0.3); -moz-box-shadow: 0 0.325rem 1.75rem rgba(0, 0, 0, 0.3); box-shadow: 0 0.325rem 1.75rem rgba(0, 0, 0, 0.3); }`
     );
-    utils.debug(`高亮当前楼层 新增 CSS id: style#${style_node.id}`);
+    utils.debug(
+      `高亮当前楼层 新增 CSS id: style#${style_nodes.custom_highlight_floor.id}`
+    );
   }
 }
 
@@ -301,26 +315,36 @@ if (
     post_nodes[i].querySelector(".t_f")?.classList.add("heti"); // 将赫蹏 class 引入帖子正文
   }
 }
-if (setting.auto_format) {
-  const style_nodes: HTMLStyleElement[] = [
-    // 引入赫蹏 CSS
-    GM_addStyle(GM_getResourceText("css")),
+const rerender_auto_format = (include_heti: boolean = true) => {
+  if (setting.auto_format) {
+    if (include_heti) {
+      // 引入赫蹏 CSS
+      style_nodes.heti?.remove();
+      style_nodes.heti = GM_addStyle(GM_getResourceText("css"));
+      utils.debug(
+        `自动格式化正文 赫蹏 更新 CSS id: style#${style_nodes.heti.id}`
+      );
+      window.onload = () => {
+        // @ts-ignore: 使用挂载到 monkeyWindow 的 Heti
+        const heti = new monkeyWindow.Heti(".heti, .heti-parent .pcb");
+        heti.autoSpacing(); // 赫蹏自动进行中西文混排美化和标点挤压
+      };
+    }
     // 修改字体
-    GM_addStyle(
+    style_nodes.custom_format_font?.remove();
+    style_nodes.custom_format_font = GM_addStyle(
       `.heti, .heti-parent .pcb { font-family: "${setting.font_name}", "Helvetica Neue", helvetica, arial, "Heti Hei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; font-size: ${setting.font_size}px; }`
-    ),
-  ];
-  utils.debug(
-    "自动格式化正文 新增 CSS id:",
-    style_nodes.map((node) => `style#${node.id}`)
-  );
-
-  window.onload = () => {
-    // @ts-ignore: 使用挂载到 monkeyWindow 的 Heti
-    const heti = new monkeyWindow.Heti(".heti, .heti-parent .pcb");
-    heti.autoSpacing(); // 赫蹏自动进行中西文混排美化和标点挤压
-  };
-}
+    );
+    // Object.entries(style_nodes).map((item) => `${item[0]}: style#${item[1]?.id}`)
+    utils.debug(
+      `自动格式化正文 自定义字体 更新 CSS id: style#${style_nodes.custom_format_font.id}`
+    );
+  } else {
+    style_nodes.heti?.remove();
+    style_nodes.custom_format_font?.remove();
+  }
+};
+rerender_auto_format();
 
 /*
 GM_notification({

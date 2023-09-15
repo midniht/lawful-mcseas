@@ -14,13 +14,14 @@ export default defineConfig({
       userscript: {
         name: { en: "Lawful MC seas", "zh-CN": "秩序心海" },
         namespace: "https://mcseas.club/home.php?mod=space&uid=95082",
-        version: "0.3.4-alpha",
+        version: "0.3.5-alpha",
         description: {
           en: "Improve the user experience of mcseas.",
           "zh-CN": "改善「混沌心海」论坛的使用体验。",
         },
         author: "miyoi",
         homepage: "https://mcseas.club/forum.php?mod=viewthread&tid=50579",
+        homepageURL: "https://github.com/midniht/lawful-mcseas",
         license: "MIT",
         match: ["*://mcseas.club/*"],
         icon: "https://mcseas.club/favicon.ico",
