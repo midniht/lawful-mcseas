@@ -157,10 +157,7 @@ const recreate_menu_command = () => {
   menu_id_map.auto_format = GM_registerMenuCommand(
     (setting.auto_format ? "✔️ 已启用" : "❌ 已禁用") + "自动格式化正文",
     () => {
-      setting.save(
-        "auto_format",
-        setting.auto_format ? "false" : "true" // 切换开关时取反
-      );
+      setting.save("auto_format", setting.auto_format ? "false" : "true");
       utils.log(
         (setting.auto_format ? "✔️ 已启用" : "❌ 已禁用") + "自动格式化正文"
       );
@@ -208,7 +205,7 @@ const recreate_menu_command = () => {
     () => {
       setting.save(
         "block_ip_warning",
-        setting.block_ip_warning ? "false" : "true" // 切换开关时取反
+        setting.block_ip_warning ? "false" : "true"
       );
       utils.log(
         (setting.block_ip_warning ? "❌ 已禁用" : "✔️ 已启用") +
@@ -220,9 +217,10 @@ const recreate_menu_command = () => {
   menu_id_map.go_to_report = GM_registerMenuCommand(
     "🆕 提出需求 & 反馈 BUG",
     () => {
+      // 参数 openInBackground: false 自动跳转到打开的标签页
       GM_openInTab(
         "https://mcseas.club/forum.php?mod=viewthread&tid=50579",
-        false // 跳转到打开的标签页
+        false
       );
     }
   );
@@ -305,10 +303,12 @@ if (
 }
 if (setting.auto_format) {
   const style_nodes: HTMLStyleElement[] = [
-    GM_addStyle(GM_getResourceText("css")), // 引入赫蹏 CSS
+    // 引入赫蹏 CSS
+    GM_addStyle(GM_getResourceText("css")),
+    // 修改字体
     GM_addStyle(
       `.heti, .heti-parent .pcb { font-family: "${setting.font_name}", "Helvetica Neue", helvetica, arial, "Heti Hei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; font-size: ${setting.font_size}px; }`
-    ), // 修改字体
+    ),
   ];
   utils.debug(
     "自动格式化正文 新增 CSS id:",
