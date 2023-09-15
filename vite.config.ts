@@ -19,7 +19,7 @@ export default defineConfig({
           en: "Improve the user experience of mcseas.",
           "zh-CN": "改善「混沌心海」论坛的使用体验。",
         },
-        author: "Miyoi",
+        author: "miyoi",
         homepage: "https://mcseas.club/forum.php?mod=viewthread&tid=50579",
         license: "MIT",
         match: ["*://mcseas.club/*"],
