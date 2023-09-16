@@ -3,7 +3,7 @@
 // @name:en            Lawful MC seas
 // @name:zh-CN         秩序心海
 // @namespace          https://mcseas.club/home.php?mod=space&uid=95082
-// @version            0.3.7-alpha
+// @version            0.5.0-alpha
 // @author             miyoi
 // @description:en     Improve the user experience of mcseas.
 // @description:zh-CN  改善「混沌心海」论坛的使用体验。
@@ -49,7 +49,7 @@
   var _GM_unregisterMenuCommand = /* @__PURE__ */ (() => typeof GM_unregisterMenuCommand != "undefined" ? GM_unregisterMenuCommand : void 0)();
   var _monkeyWindow = /* @__PURE__ */ (() => window)();
   const name = "lawful-mcseas";
-  const version = "0.3.7";
+  const version = "0.5.0";
   const type = "module";
   const scripts = {
     dev: "vite",
@@ -95,6 +95,7 @@
       __publicField(this, "font_size");
       __publicField(this, "only_format_lz");
       __publicField(this, "block_ip_warning");
+      __publicField(this, "display_user_medal");
       __publicField(this, "block_email_warning");
       __publicField(this, "data");
       this.load();
@@ -106,6 +107,7 @@
       this.font_size = this.font_size > 0 ? this.font_size : 16;
       this.only_format_lz = _GM_getValue("cfg_only_format_lz") !== "false";
       this.block_ip_warning = _GM_getValue("cfg_block_ip_warning") === "true";
+      this.display_user_medal = _GM_getValue("cfg_display_user_medal") !== "false";
       this.block_email_warning = _GM_getValue("cfg_block_email_warning") === "true";
       this.data = {
         user_blacklist: JSON.parse(_GM_getValue("data_user_blacklist") ?? "[]"),
@@ -133,6 +135,7 @@
     format_font_name: "",
     format_font_size: "",
     switch_ip_warning: "",
+    display_user_medal: "",
     go_to_report: "",
     edit_replace_pair: "",
     reset_config: ""
@@ -243,6 +246,19 @@
         recreate_menu_command();
       }
     );
+    menu_id_map.display_user_medal = _GM_registerMenuCommand(
+      (setting.display_user_medal ? "✔️ 显示" : "❌ 隐藏") + "所有用户勋章",
+      () => {
+        setting.save(
+          "display_user_medal",
+          setting.display_user_medal ? "false" : "true"
+        );
+        utils.log(
+          (setting.display_user_medal ? "✔️ 已显示" : "❌ 已隐藏") + "所有用户勋章"
+        );
+        window.location.reload();
+      }
+    );
     menu_id_map.edit_replace_pair = _GM_registerMenuCommand(
       "🎭 设置自动替换关键词",
       () => {
@@ -250,7 +266,7 @@
           setting.data.replace_pair_list
         ).map(([key, value]) => `${key}-${value}`).join(", ");
         const replace_pair_str = prompt(
-          "请输入自动替换的关键词组：\n（格式为 `被替换词-替换词`，多个词组用英文逗号 , 分开）\n\n注意：只推荐替换中文全角字符，如果替换常见英文字符极有可能会导致乱码。若出现乱码请重新在此处设置以调试效果。",
+          "请输入自动替换的关键词组：\n（格式为 `被替换词-替换词`，多个词组用英文逗号 `,` 分开）\n\n注意：只推荐替换中文全角字符，如果替换常见英文字符极有可能会导致乱码。若出现乱码请重新在此处设置以调试效果。",
           current_replace_pair_str || "“-「, ”-」, ‘-『, ’-』"
         );
         if (replace_pair_str !== null) {
@@ -371,6 +387,12 @@
       );
       break;
     case "viewthread":
+      if (!setting.display_user_medal) {
+        let medal_nodes = document.querySelectorAll(".md_ctrl");
+        medal_nodes.forEach((node) => {
+          node.remove();
+        });
+      }
       let follow_node = document.querySelector("#follow_li");
       if (follow_node) {
         follow_node.style.width = "65px";
