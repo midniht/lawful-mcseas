@@ -54,6 +54,7 @@ class Config {
   font_size!: number;
   only_format_lz!: boolean;
   block_ip_warning!: boolean;
+  display_user_medal!: boolean;
   block_email_warning!: boolean;
   data!: {
     user_blacklist: string[];
@@ -72,6 +73,7 @@ class Config {
     this.font_size = this.font_size > 0 ? this.font_size : 16;
     this.only_format_lz = GM_getValue("cfg_only_format_lz") !== "false";
     this.block_ip_warning = GM_getValue("cfg_block_ip_warning") === "true";
+    this.display_user_medal = GM_getValue("cfg_display_user_medal") !== "false";
     this.block_email_warning =
       GM_getValue("cfg_block_email_warning") === "true";
     this.data = {
@@ -110,6 +112,7 @@ type MenuIdMapKeys =
   | "format_font_name"
   | "format_font_size"
   | "switch_ip_warning"
+  | "display_user_medal"
   | "go_to_report"
   | "edit_replace_pair"
   | "reset_config";
@@ -122,6 +125,7 @@ let menu_id_map: MenuIdMap = {
   format_font_name: "",
   format_font_size: "",
   switch_ip_warning: "",
+  display_user_medal: "",
   go_to_report: "",
   edit_replace_pair: "",
   reset_config: "",
@@ -250,6 +254,20 @@ const recreate_menu_command = () => {
       recreate_menu_command();
     }
   );
+  menu_id_map.display_user_medal = GM_registerMenuCommand(
+    (setting.display_user_medal ? "✔️ 显示" : "❌ 隐藏") + "所有用户勋章",
+    () => {
+      setting.save(
+        "display_user_medal",
+        setting.display_user_medal ? "false" : "true"
+      );
+      utils.log(
+        (setting.display_user_medal ? "✔️ 已显示" : "❌ 已隐藏") +
+          "所有用户勋章"
+      );
+      window.location.reload();
+    }
+  );
   menu_id_map.edit_replace_pair = GM_registerMenuCommand(
     "🎭 设置自动替换关键词",
     () => {
@@ -259,7 +277,7 @@ const recreate_menu_command = () => {
         .map(([key, value]) => `${key}-${value}`)
         .join(", ");
       const replace_pair_str: string | null = prompt(
-        "请输入自动替换的关键词组：\n（格式为 `被替换词-替换词`，多个词组用英文逗号 , 分开）" +
+        "请输入自动替换的关键词组：\n（格式为 `被替换词-替换词`，多个词组用英文逗号 `,` 分开）" +
           "\n\n注意：只推荐替换中文全角字符，如果替换常见英文字符极有可能会导致乱码。若出现乱码请重新在此处设置以调试效果。",
         current_replace_pair_str || "“-「, ”-」, ‘-『, ’-』"
       );
@@ -425,6 +443,15 @@ switch (view_mode) {
 
   /* 浏览帖子详情模式 */
   case "viewthread":
+    // 隐藏勋章
+    if (!setting.display_user_medal) {
+      let medal_nodes: NodeListOf<HTMLElement> =
+        document.querySelectorAll(".md_ctrl");
+      medal_nodes.forEach((node) => {
+        node.remove();
+      });
+    }
+
     // 添加屏蔽按钮
     let follow_node: HTMLElement | null = document.querySelector("#follow_li");
     if (follow_node) {
