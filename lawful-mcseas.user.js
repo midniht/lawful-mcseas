@@ -3,7 +3,7 @@
 // @name:en            Lawful MC seas
 // @name:zh-CN         秩序心海
 // @namespace          https://mcseas.club/home.php?mod=space&uid=95082
-// @version            0.5.0-alpha
+// @version            0.5.1-alpha
 // @author             miyoi
 // @description:en     Improve the user experience of mcseas.
 // @description:zh-CN  改善「混沌心海」论坛的使用体验。
@@ -49,7 +49,7 @@
   var _GM_unregisterMenuCommand = /* @__PURE__ */ (() => typeof GM_unregisterMenuCommand != "undefined" ? GM_unregisterMenuCommand : void 0)();
   var _monkeyWindow = /* @__PURE__ */ (() => window)();
   const name = "lawful-mcseas";
-  const version = "0.5.0";
+  const version = "0.5.1";
   const type = "module";
   const scripts = {
     dev: "vite",
@@ -91,6 +91,7 @@
     constructor() {
       __publicField(this, "version", `${pkg.version}-alpha`);
       __publicField(this, "auto_format");
+      __publicField(this, "auto_format_with_segment");
       __publicField(this, "font_name");
       __publicField(this, "font_size");
       __publicField(this, "only_format_lz");
@@ -102,6 +103,7 @@
     }
     load() {
       this.auto_format = _GM_getValue("cfg_auto_format") !== "false";
+      this.auto_format_with_segment = _GM_getValue("cfg_auto_format_with_segment") !== "false";
       this.font_name = _GM_getValue("cfg_font_name") || "小赖字体 等宽 SC";
       this.font_size = Number(_GM_getValue("cfg_font_size"));
       this.font_size = this.font_size > 0 ? this.font_size : 16;
@@ -130,8 +132,8 @@
     heti: void 0
   };
   let menu_id_map = {
-    click_num: "",
     auto_format: "",
+    auto_format_with_segment: "",
     format_font_name: "",
     format_font_size: "",
     switch_ip_warning: "",
@@ -155,9 +157,10 @@
         };
       }
       (_b2 = style_nodes.custom_format_font) == null ? void 0 : _b2.remove();
-      style_nodes.custom_format_font = _GM_addStyle(
-        `.heti, .heti-parent .pcb { font-family: "${setting.font_name}", "Helvetica Neue", helvetica, arial, "Heti Hei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; font-size: ${setting.font_size}px; }`
-      );
+      style_nodes.custom_format_font = _GM_addStyle(`
+      .heti, .heti-parent .pcb { font-family: "${setting.font_name}", "Helvetica Neue", helvetica, arial, "Heti Hei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; font-size: ${setting.font_size}px; }
+      .t_f > div:not(.blockcode) { margin-bottom: .75em; }
+    `);
       utils.debug(
         `自动格式化正文 自定义字体 更新 CSS id: style#${style_nodes.custom_format_font.id}`
       );
@@ -174,13 +177,6 @@
         menu_id_map[menu_key] = "";
       }
     }
-    menu_id_map.click_num = _GM_registerMenuCommand(
-      "👆 点击了 " + _GM_getValue("click_num", 0) + " 次",
-      () => {
-        _GM_setValue("click_num", _GM_getValue("click_num", 0) + 1);
-        recreate_menu_command();
-      }
-    );
     menu_id_map.auto_format = _GM_registerMenuCommand(
       (setting.auto_format ? "✔️ 已启用" : "❌ 已禁用") + "自动格式化正文",
       () => {
@@ -190,6 +186,20 @@
         );
         rerender_auto_format();
         recreate_menu_command();
+      },
+      "r"
+    );
+    menu_id_map.auto_format_with_segment = _GM_registerMenuCommand(
+      "　├─ " + (setting.auto_format_with_segment ? "✔️ 已启用" : "❌ 已禁用") + "自动重新分段",
+      () => {
+        setting.save(
+          "auto_format_with_segment",
+          setting.auto_format_with_segment ? "false" : "true"
+        );
+        utils.log(
+          (setting.auto_format_with_segment ? "✔️ 已启用" : "❌ 已禁用") + "自动重新分段"
+        );
+        window.location.reload();
       },
       "r"
     );
@@ -441,6 +451,17 @@
           let post_node = post_nodes[i].querySelector(".t_f");
           if (post_node) {
             post_node.classList.add("heti");
+            if (setting.auto_format_with_segment) {
+              post_node.innerHTML = post_node.innerHTML.split("\n").map((paragraph) => {
+                const formatted_paragraph = paragraph.replaceAll("&nbsp;", " ").trim();
+                return formatted_paragraph ? `　　${formatted_paragraph}` : "";
+              }).join("\n");
+              post_node.querySelectorAll("div, p, span").forEach((node) => {
+                if (node.style.display !== "none") {
+                  node.innerHTML = "　　" + node.innerHTML.replaceAll("&nbsp;", " ").trim();
+                }
+              });
+            }
             for (let [pattern, replacement] of Object.entries(
               setting.data.replace_pair_list
             )) {
