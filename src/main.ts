@@ -107,7 +107,6 @@ let style_nodes: StyleNodes = {
 };
 
 type MenuIdMapKeys =
-  | "click_num"
   | "auto_format"
   | "format_font_name"
   | "format_font_size"
@@ -120,7 +119,6 @@ type MenuIdMap = {
   [key in MenuIdMapKeys]: string;
 };
 let menu_id_map: MenuIdMap = {
-  click_num: "",
   auto_format: "",
   format_font_name: "",
   format_font_size: "",
@@ -181,13 +179,6 @@ const recreate_menu_command = () => {
       menu_id_map[menu_key] = "";
     }
   }
-  menu_id_map.click_num = GM_registerMenuCommand(
-    "👆 点击了 " + GM_getValue("click_num", 0) + " 次",
-    () => {
-      GM_setValue("click_num", GM_getValue("click_num", 0) + 1);
-      recreate_menu_command();
-    }
-  );
   menu_id_map.auto_format = GM_registerMenuCommand(
     (setting.auto_format ? "✔️ 已启用" : "❌ 已禁用") + "自动格式化正文",
     () => {
