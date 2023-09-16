@@ -50,6 +50,7 @@ class Utils {
 class Config {
   readonly version: string = `${pkg.version}-alpha`;
   auto_format!: boolean;
+  auto_format_with_segment!: boolean;
   font_name!: string;
   font_size!: number;
   only_format_lz!: boolean;
@@ -67,6 +68,8 @@ class Config {
 
   load(): void {
     this.auto_format = GM_getValue("cfg_auto_format") !== "false";
+    this.auto_format_with_segment =
+      GM_getValue("cfg_auto_format_with_segment") !== "false";
     this.font_name = GM_getValue("cfg_font_name") || "小赖字体 等宽 SC";
     // "LXGW Bright", "LXGW Wenkai Mono", "霞鹜新晰黑", "悠哉字体", "小赖字体 等宽 SC", "Ark Pixel 12px Proportional zh_cn"
     this.font_size = Number(GM_getValue("cfg_font_size"));
@@ -108,6 +111,7 @@ let style_nodes: StyleNodes = {
 
 type MenuIdMapKeys =
   | "auto_format"
+  | "auto_format_with_segment"
   | "format_font_name"
   | "format_font_size"
   | "switch_ip_warning"
@@ -120,6 +124,7 @@ type MenuIdMap = {
 };
 let menu_id_map: MenuIdMap = {
   auto_format: "",
+  auto_format_with_segment: "",
   format_font_name: "",
   format_font_size: "",
   switch_ip_warning: "",
@@ -152,9 +157,10 @@ const rerender_auto_format = (include_heti: boolean = true) => {
     }
     // 修改字体
     style_nodes.custom_format_font?.remove();
-    style_nodes.custom_format_font = GM_addStyle(
-      `.heti, .heti-parent .pcb { font-family: "${setting.font_name}", "Helvetica Neue", helvetica, arial, "Heti Hei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; font-size: ${setting.font_size}px; }`
-    );
+    style_nodes.custom_format_font = GM_addStyle(`
+      .heti, .heti-parent .pcb { font-family: "${setting.font_name}", "Helvetica Neue", helvetica, arial, "Heti Hei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; font-size: ${setting.font_size}px; }
+      .t_f > div:not(.blockcode) { margin-bottom: .75em; }
+    `);
     // Object.entries(style_nodes).map((item) => `${item[0]}: style#${item[1]?.id}`)
     utils.debug(
       `自动格式化正文 自定义字体 更新 CSS id: style#${style_nodes.custom_format_font.id}`
@@ -188,6 +194,23 @@ const recreate_menu_command = () => {
       );
       rerender_auto_format();
       recreate_menu_command();
+    },
+    "r"
+  );
+  menu_id_map.auto_format_with_segment = GM_registerMenuCommand(
+    "　├─ " +
+      (setting.auto_format_with_segment ? "✔️ 已启用" : "❌ 已禁用") +
+      "自动重新分段",
+    () => {
+      setting.save(
+        "auto_format_with_segment",
+        setting.auto_format_with_segment ? "false" : "true"
+      );
+      utils.log(
+        (setting.auto_format_with_segment ? "✔️ 已启用" : "❌ 已禁用") +
+          "自动重新分段"
+      );
+      window.location.reload();
     },
     "r"
   );
@@ -512,6 +535,28 @@ switch (view_mode) {
         if (post_node) {
           // 将赫蹏 class 引入帖子正文
           post_node.classList.add("heti");
+          // 自动重新分段并提行
+          if (setting.auto_format_with_segment) {
+            post_node.innerHTML = post_node.innerHTML
+              .split("\n")
+              .map((paragraph) => {
+                const formatted_paragraph: string = paragraph
+                  .replaceAll("&nbsp;", " ")
+                  .trim();
+                // console.log(`formatted_paragraph = [${formatted_paragraph}]`);
+                return formatted_paragraph ? `　　${formatted_paragraph}` : "";
+              })
+              .join("\n");
+            post_node
+              .querySelectorAll<HTMLElement>("div, p, span")
+              .forEach((node) => {
+                if (node.style.display !== "none") {
+                  node.innerHTML =
+                    "　　" + node.innerHTML.replaceAll("&nbsp;", " ").trim();
+                  // console.log("node", node);
+                }
+              });
+          }
           // 自动替换关键词
           for (let [pattern, replacement] of Object.entries(
             setting.data.replace_pair_list
