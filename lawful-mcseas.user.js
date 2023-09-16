@@ -189,21 +189,21 @@
       },
       "r"
     );
-    menu_id_map.auto_format_with_segment = _GM_registerMenuCommand(
-      "　├─ " + (setting.auto_format_with_segment ? "✔️ 已启用" : "❌ 已禁用") + "自动重新分段",
-      () => {
-        setting.save(
-          "auto_format_with_segment",
-          setting.auto_format_with_segment ? "false" : "true"
-        );
-        utils.log(
-          (setting.auto_format_with_segment ? "✔️ 已启用" : "❌ 已禁用") + "自动重新分段"
-        );
-        window.location.reload();
-      },
-      "r"
-    );
     if (setting.auto_format) {
+      menu_id_map.auto_format_with_segment = _GM_registerMenuCommand(
+        "　├─ " + (setting.auto_format_with_segment ? "✔️ 已启用" : "❌ 已禁用") + "自动重新分段",
+        () => {
+          setting.save(
+            "auto_format_with_segment",
+            setting.auto_format_with_segment ? "false" : "true"
+          );
+          utils.log(
+            (setting.auto_format_with_segment ? "✔️ 已启用" : "❌ 已禁用") + "自动重新分段"
+          );
+          window.location.reload();
+        },
+        "r"
+      );
       menu_id_map.format_font_name = _GM_registerMenuCommand(
         `　├─ 🗚 字体: "${setting.font_name}"`,
         () => {
