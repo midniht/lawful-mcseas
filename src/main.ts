@@ -4,11 +4,9 @@
  */
 
 import {
-  GM_log,
   GM_getResourceText,
   GM_addStyle,
   GM_setValue,
-  GM_getValue,
   GM_listValues,
   GM_deleteValue,
   GM_registerMenuCommand,
@@ -16,125 +14,10 @@ import {
   GM_openInTab,
   monkeyWindow,
 } from "$";
-import pkg from "../package.json";
-
-class Utils {
-  current(): string {
-    const t = new Date();
-    const pad = (
-      pad_target: any,
-      pad_length: number = 2,
-      pad_string: string = "0"
-    ): string => pad_target.toString().padStart(pad_length, pad_string);
-    return (
-      [pad(t.getFullYear(), 4), pad(t.getMonth() + 1), pad(t.getDate())].join(
-        "-"
-      ) +
-      " " +
-      [pad(t.getHours()), pad(t.getMinutes()), pad(t.getSeconds())].join(":")
-    );
-  }
-
-  debug(...args: any[]): void {
-    GM_log(`${this.current()} | DEBUG |`, ...args);
-  }
-
-  log(...args: any[]): void {
-    console.log(`${this.current()} [秩序心海]`, ...args);
-  }
-
-  // match_reg(text: string, regexp: RegExp): string | null {
-  //   const match_result = [...text.matchAll(regexp)];
-  //   return match_result.length > 0 ? match_result[0][1] : null;
-  // }
-}
-
-class Config {
-  readonly version: string = `${pkg.version}-alpha`;
-  auto_format!: boolean;
-  auto_format_with_segment!: boolean;
-  font_name!: string;
-  font_size!: number;
-  only_format_lz!: boolean;
-  block_ip_warning!: boolean;
-  display_user_medal!: boolean;
-  block_email_warning!: boolean;
-  data!: {
-    user_blacklist: string[];
-    replace_pair_list: { [key: string]: string };
-  };
-
-  constructor() {
-    this.load();
-  }
-
-  load(): void {
-    this.auto_format = GM_getValue("cfg_auto_format") !== "false";
-    this.auto_format_with_segment =
-      GM_getValue("cfg_auto_format_with_segment") !== "false";
-    this.font_name = GM_getValue("cfg_font_name") || "小赖字体 等宽 SC";
-    // "LXGW Bright", "LXGW Wenkai Mono", "霞鹜新晰黑", "悠哉字体", "小赖字体 等宽 SC", "Ark Pixel 12px Proportional zh_cn"
-    this.font_size = Number(GM_getValue("cfg_font_size"));
-    this.font_size = this.font_size > 0 ? this.font_size : 16;
-    this.only_format_lz = GM_getValue("cfg_only_format_lz") !== "false";
-    this.block_ip_warning = GM_getValue("cfg_block_ip_warning") === "true";
-    this.display_user_medal = GM_getValue("cfg_display_user_medal") !== "false";
-    this.block_email_warning =
-      GM_getValue("cfg_block_email_warning") === "true";
-    this.data = {
-      user_blacklist: JSON.parse(GM_getValue("data_user_blacklist") ?? "[]"),
-      replace_pair_list: JSON.parse(
-        GM_getValue("data_replace_pair_list") ?? "{}"
-      ),
-    };
-  }
-
-  save(key: string, value: string): void {
-    GM_setValue(`cfg_${key}`, value);
-    this.load();
-  }
-}
+import { Utils, Config, menu_id_map, style_nodes } from "./utils";
 
 const utils = new Utils();
 const setting = new Config();
-
-type StyleNodes = {
-  custom_view_list: HTMLStyleElement | undefined;
-  custom_format_font: HTMLStyleElement | undefined;
-  custom_highlight_floor: HTMLStyleElement | undefined;
-  heti: HTMLStyleElement | undefined;
-};
-let style_nodes: StyleNodes = {
-  custom_view_list: undefined,
-  custom_format_font: undefined,
-  custom_highlight_floor: undefined,
-  heti: undefined,
-};
-
-type MenuIdMapKeys =
-  | "auto_format"
-  | "auto_format_with_segment"
-  | "format_font_name"
-  | "format_font_size"
-  | "switch_ip_warning"
-  | "display_user_medal"
-  | "go_to_report"
-  | "edit_replace_pair"
-  | "reset_config";
-type MenuIdMap = {
-  [key in MenuIdMapKeys]: string;
-};
-let menu_id_map: MenuIdMap = {
-  auto_format: "",
-  auto_format_with_segment: "",
-  format_font_name: "",
-  format_font_size: "",
-  switch_ip_warning: "",
-  display_user_medal: "",
-  go_to_report: "",
-  edit_replace_pair: "",
-  reset_config: "",
-};
 
 /**
  * @function rerender_auto_format
@@ -179,12 +62,11 @@ const rerender_auto_format = (include_heti: boolean = true) => {
  * @description 重绘脚本菜单
  */
 const recreate_menu_command = () => {
-  let menu_key: keyof MenuIdMap;
-  for (menu_key in menu_id_map) {
-    // utils.debug(`重绘前 Menu["${menu_key}"] = "${menu_id_map[menu_key]}"`);
-    if (menu_id_map[menu_key] !== "") {
-      GM_unregisterMenuCommand(menu_id_map[menu_key]);
-      menu_id_map[menu_key] = "";
+  for (let [menu_key, menu_id] of Object.entries(menu_id_map)) {
+    // utils.debug(`重绘前 Menu["${menu_key}"] = "${menu_id}"`);
+    if (menu_id) {
+      GM_unregisterMenuCommand(menu_id);
+      (menu_id_map as any)[menu_key] = "";
     }
   }
   menu_id_map.auto_format = GM_registerMenuCommand(
@@ -236,7 +118,7 @@ const recreate_menu_command = () => {
       "f"
     );
     menu_id_map.format_font_size = GM_registerMenuCommand(
-      `　└─ 🗚 字体大小: ${setting.font_size} px`,
+      `　├─ 🗚 字体大小: ${setting.font_size} px`,
       () => {
         const font_size: number = Number(
           prompt(
@@ -254,6 +136,47 @@ const recreate_menu_command = () => {
         }
       },
       "s"
+    );
+    menu_id_map.edit_replace_pair = GM_registerMenuCommand(
+      "　└─ 🎭 设置自动替换关键词",
+      () => {
+        const current_replace_pair_str: string = Object.entries(
+          setting.data.replace_pair_list
+        )
+          .map(([key, value]) => `${key}-${value}`)
+          .join(", ");
+        const replace_pair_str: string | null = prompt(
+          "请输入自动替换的关键词组：\n（格式为 `被替换词-替换词`，多个词组用英文逗号 `,` 分开）" +
+            "\n\n注意：只推荐替换中文全角字符，如果替换常见英文字符极有可能会导致乱码。若出现乱码请重新在此处设置以调试效果。",
+          current_replace_pair_str || "“-「, ”-」, ‘-『, ’-』"
+        );
+        if (replace_pair_str !== null) {
+          setting.data.replace_pair_list = {};
+          GM_setValue(`data_replace_pair_list`, "{}");
+          if (replace_pair_str === "") {
+            utils.debug("自动替换词组已清空");
+            alert("自动替换词组已清空。");
+          } else {
+            for (const pair_str of replace_pair_str
+              .split(",")
+              .map((pair) => pair.trim())) {
+              const [pattern, replacement]: string[] = pair_str
+                .split("-")
+                .map((keyword) => keyword.trim());
+              setting.data.replace_pair_list[pattern] = replacement;
+            }
+            GM_setValue(
+              `data_replace_pair_list`,
+              JSON.stringify(setting.data.replace_pair_list)
+            );
+            utils.debug("新的自动替换词组:", setting.data.replace_pair_list);
+            alert("自动替换词组更新完成。");
+          }
+          window.location.reload();
+        } else {
+          utils.debug("用户取消输入");
+        }
+      }
     );
   }
   menu_id_map.switch_ip_warning = GM_registerMenuCommand(
@@ -282,47 +205,6 @@ const recreate_menu_command = () => {
           "所有用户勋章"
       );
       window.location.reload();
-    }
-  );
-  menu_id_map.edit_replace_pair = GM_registerMenuCommand(
-    "🎭 设置自动替换关键词",
-    () => {
-      const current_replace_pair_str: string = Object.entries(
-        setting.data.replace_pair_list
-      )
-        .map(([key, value]) => `${key}-${value}`)
-        .join(", ");
-      const replace_pair_str: string | null = prompt(
-        "请输入自动替换的关键词组：\n（格式为 `被替换词-替换词`，多个词组用英文逗号 `,` 分开）" +
-          "\n\n注意：只推荐替换中文全角字符，如果替换常见英文字符极有可能会导致乱码。若出现乱码请重新在此处设置以调试效果。",
-        current_replace_pair_str || "“-「, ”-」, ‘-『, ’-』"
-      );
-      if (replace_pair_str !== null) {
-        setting.data.replace_pair_list = {};
-        GM_setValue(`data_replace_pair_list`, "{}");
-        if (replace_pair_str === "") {
-          utils.debug("自动替换词组已清空");
-          alert("自动替换词组已清空。");
-        } else {
-          for (const pair_str of replace_pair_str
-            .split(",")
-            .map((pair) => pair.trim())) {
-            const [pattern, replacement]: string[] = pair_str
-              .split("-")
-              .map((keyword) => keyword.trim());
-            setting.data.replace_pair_list[pattern] = replacement;
-          }
-          GM_setValue(
-            `data_replace_pair_list`,
-            JSON.stringify(setting.data.replace_pair_list)
-          );
-          utils.debug("新的自动替换词组:", setting.data.replace_pair_list);
-          alert("自动替换词组更新完成。");
-        }
-        window.location.reload();
-      } else {
-        utils.debug("用户取消输入");
-      }
     }
   );
   menu_id_map.go_to_report = GM_registerMenuCommand(
@@ -372,16 +254,16 @@ window.block_user = (user_name: string) => {
 /* 全站生效 */
 
 // utils.debug("lawful-mcseas 脚本开发中...");
-utils.debug("GM_listValues()", GM_listValues());
+// utils.debug("GM_listValues()", GM_listValues());
 // console.log({ unsafeWindow, monkeyWindow });
 utils.log("脚本当前版本:", setting.version);
-utils.log("自动格式化正文:", setting.auto_format);
+utils.log("启用自动格式化正文:", setting.auto_format);
 utils.log(`自动格式化时 正文字体: "${setting.font_name}"`);
 utils.log(`自动格式化时 正文字体大小: ${setting.font_size} px`);
-utils.log("只格式化一楼:", setting.only_format_lz);
+utils.log("自动格式化时 替换关键词:", setting.data.replace_pair_list);
+utils.log("自动格式化时 只格式化一楼:", setting.only_format_lz);
 utils.log("自动屏蔽异地 IP 登录提醒:", setting.block_ip_warning);
-utils.log("屏蔽黑名单:", setting.data.user_blacklist);
-utils.log("关键词替换:", setting.data.replace_pair_list);
+utils.log("屏蔽用户黑名单:", setting.data.user_blacklist);
 recreate_menu_command();
 
 // 自动关闭异地 IP 登录提醒
