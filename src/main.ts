@@ -27,7 +27,9 @@ class Utils {
       pad_string: string = "0"
     ): string => pad_target.toString().padStart(pad_length, pad_string);
     return (
-      [pad(t.getFullYear(), 4), pad(t.getMonth()), pad(t.getDate())].join("-") +
+      [pad(t.getFullYear(), 4), pad(t.getMonth() + 1), pad(t.getDate())].join(
+        "-"
+      ) +
       " " +
       [pad(t.getHours()), pad(t.getMinutes()), pad(t.getSeconds())].join(":")
     );
